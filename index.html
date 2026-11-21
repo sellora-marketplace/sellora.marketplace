@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELLORA - Online Marketplace</title>
+<meta name="description" content="Buy and sell online with SELLORA. Shop electronics, fashion, furniture, vehicles and more in Kosovo.">
+<meta name="robots" content="index,follow">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f6fb;color:#172033}
+header{background:#101c32;color:white;padding:20px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+.logo{font-size:28px;font-weight:bold;color:#f3b44c}
+nav{display:flex;gap:15px;align-items:center;flex-wrap:wrap}
+nav a{color:white;text-decoration:none;font-size:14px}
+button{border:0;padding:12px 17px;border-radius:7px;cursor:pointer;font-weight:bold}
+.gold{background:#f3b44c;color:#101c32}
+.dark{background:#101c32;color:white}
+.hero{text-align:center;background:linear-gradient(135deg,#101c32,#304c75);color:white;padding:80px 20px}
+.hero h1{font-size:44px;margin-bottom:15px}
+.hero p{color:#dce5f2;margin-bottom:25px}
+.search{display:flex;max-width:550px;margin:auto;background:white;border-radius:9px;overflow:hidden}
+.search input{flex:1;min-width:0;padding:16px;border:0;outline:none}
+section{padding:40px 7%}
+h2{margin-bottom:22px}
+.categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px}
+.category{background:white;padding:23px 10px;text-align:center;border-radius:12px;cursor:pointer;font-weight:bold;box-shadow:0 3px 12px #00000008}
+.category:hover{background:#fff2d9}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px}
+.product{background:white;border-radius:13px;overflow:hidden;box-shadow:0 4px 15px #00000010}
+.product img{width:100%;height:190px;object-fit:cover}
+.product-info{padding:16px}
+.price{color:#13865b;font-size:21px;font-weight:bold;margin:12px 0}
+.product button{width:100%;margin-top:10px}
+.panel{background:white;max-width:650px;margin:20px auto;padding:28px;border-radius:14px;box-shadow:0 4px 20px #00000010}
+.panel input,.panel textarea,.panel select{width:100%;padding:13px;margin:9px 0;border:1px solid #ddd;border-radius:8px}
+.panel button{width:100%;margin-top:10px}
+.hidden{display:none!important}
+.account{display:none}
+.cart-item{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #ddd}
+footer{background:#101c32;color:white;text-align:center;padding:30px;line-height:2}
+.muted{color:#657087;font-size:13px}
+@media(max-width:600px){.hero h1{font-size:32px}header{justify-content:center}nav{justify-content:center}}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">✦ SELLORA</div>
+<nav>
+<a href="#home">Home</a>
+<a href="#products">Products</a>
+<a href="#sell">Sell</a>
+<a href="#cart">🛒 Cart (<span id="cartCount">0</span>)</a>
+<a href="#account">Account</a>
+<button class="gold" id="loginBtn" onclick="showAuth('login')">Login</button>
+<button class="gold hidden" id="logoutBtn" onclick="logout()">Logout</button>
+</nav>
+</header>
+
+<div class="hero" id="home">
+<h1>Find It. Love It. Buy It.</h1>
+<p>Kosovo's online marketplace. Buy smart. Sell easy.</p>
+<div class="search">
+<input id="search" placeholder="Search products...">
+<button class="gold" onclick="searchProducts()">Search</button>
+</div>
+</div>
+
+<section>
+<h2>Popular Categories</h2>
+<div class="categories">
+<div class="category" onclick="filter('Electronics')">📱 Electronics</div>
+<div class="category" onclick="filter('Fashion')">👕 Fashion</div>
+<div class="category" onclick="filter('Vehicles')">🚗 Vehicles</div>
+<div class="category" onclick="filter('Furniture')">🛋️ Furniture</div>
+<div class="category" onclick="filter('Sports')">⚽ Sports</div>
+<div class="category" onclick="filter('Other')">📦 Other</div>
+<div class="category" onclick="filter('All')">🌟 All</div>
+</div>
+</section>
+
+<section id="products">
+<h2>🔥 Latest Products</h2>
+<div class="products" id="productList"></div>
+</section>
+
+<section id="auth" class="hidden">
+<div class="panel">
+<h2 id="authTitle">Login to SELLORA</h2>
+<form id="authForm">
+<input id="name" placeholder="Full name" class="hidden">
+<input id="email" type="email" placeholder="Email address" required>
+<input id="password" type="password" placeholder="Password" minlength="8" required>
+<select id="role" class="hidden">
+<option value="customer">Customer</option>
+<option value="seller">Seller</option>
+</select>
+<button class="dark" id="authSubmit">Login</button>
+</form>
+<p id="authMessage" class="muted"></p>
+<p id="authSwitch">No account? <a href="#" onclick="showAuth('signup')">Sign up</a></p>
+</div>
+</section>
+
+<section id="account" class="account">
+<div class="panel">
+<h2>👤 My Account</h2>
+<h3 id="welcome"></h3>
+<p id="profileEmail"></p>
+<p id="profileRole"></p>
+<hr style="margin:20px 0">
+<h3>My Orders</h3>
+<div id="myOrders">No orders yet.</div>
+<hr style="margin:20px 0">
+<h3>Seller Dashboard</h3>
+<p>Manage your products and sales.</p>
+<button class="dark" onclick="location.href='#sell'">Publish Product</button>
+<button class="dark" onclick="showSellerOrders()">View Seller Orders</button>
+<div id="sellerOrders"></div>
+<hr style="margin:20px 0">
+<h3>Payment Account</h3>
+<p>Payment provider: Not connected</p>
+<p class="muted">Bank and seller payout integration requires provider approval.</p>
+</div>
+</section>
+
+<section id="sell">
+<div class="panel">
+<h2>📦 Sell Your Product</h2>
+<form id="sellForm">
+<input id="productName" placeholder="Product name" required>
+<input id="productPrice" type="number" min="0.01" step="0.01" placeholder="Price in EUR" required>
+<select id="productCategory" required>
+<option value="">Choose category</option>
+<option>Electronics</option>
+<option>Fashion</option>
+<option>Vehicles</option>
+<option>Furniture</option>
+<option>Sports</option>
+<option>Other</option>
+</select>
+<input id="productImage" type="url" placeholder="Image URL">
+<input id="productStock" type="number" min="1" value="1" required>
+<textarea id="productDescription" placeholder="Description" required></textarea>
+<button class="dark">＋ Publish Product</button>
+</form>
+</div>
+</section>
+
+<section id="cart">
+<div class="panel">
+<h2>🛒 Shopping Cart</h2>
+<div id="cartItems">Your cart is empty.</div>
+<h3 style="margin-top:20px">Total: €<span id="total">0.00</span></h3>
+<button class="gold" onclick="checkout()">Proceed to Checkout</button>
+</div>
+</section>
+
+<section id="checkout" class="hidden">
+<div class="panel">
+<h2>💳 Checkout</h2>
+<form id="checkoutForm">
+<input id="buyerName" placeholder="Full name" required>
+<input id="buyerEmail" type="email" placeholder="Email" required>
+<input id="address" placeholder="Delivery address in Kosovo" required>
+<select id="payment" required>
+<option value="">Choose payment</option>
+<option value="card">Visa / Mastercard</option>
+<option value="bank">Bank transfer</option>
+<option value="cod">Cash on delivery</option>
+</select>
+<p class="muted">Online payments require a verified payment provider.</p>
+<button class="dark">Place Order</button>
+</form>
+<p id="checkoutMessage"></p>
+</div>
+</section>
+
+<footer>
+<h2>✦ SELLORA</h2>
+<p>Buy Smart. Sell Easy.</p>
+<p>Kosovo | EUR (€)</p>
+<p>© 2026 SELLORA Marketplace</p>
+</footer>
+
+<script>
+
+let products=[
+{id:1,name:"Smartphone",price:350,category:"Electronics",stock:5,description:"Excellent condition smartphone.",image:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500"},
+{id:2,name:"Sports Sneakers",price:65,category:"Fashion",stock:8,description:"Brand new comfortable shoes.",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"},
+{id:3,name:"Classic Watch",price:90,category:"Fashion",stock:4,description:"Elegant everyday watch.",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"},
+{id:4,name:"Modern Laptop",price:550,category:"Electronics",stock:3,description:"Laptop for work and study.",image:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500"},
+{id:5,name:"Wireless Headphones",price:45,category:"Electronics",stock:10,description:"High quality headphones.",image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"},
+{id:6,name:"Modern Sofa",price:280,category:"Furniture",stock:2,description:"Comfortable living room sofa.",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500"},
+{id:7,name:"Mountain Bike",price:220,category:"Sports",stock:3,description:"Outdoor mountain bike.",image:"https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=500"},
+{id:8,name:"Digital Camera",price:400,category:"Electronics",stock:2,description:"Camera for photography.",image:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500"},
+{id:9,name:"Modern Chair",price:110,category:"Furniture",stock:6,description:"Stylish designer chair.",image:"https://images.unsplash.com/photo-1503602642458-232111445657?w=500"}
+];
+
+let cart=[];
+let currentUser=null;
+let orders=[];
+
+function renderProducts(list=products){
+const area=document.getElementById("productList");
+area.innerHTML="";
+list.forEach(p=>{
+const card=document.createElement("article");
+card.className="product";
+const img=document.createElement("img");
+img.src=p.image||"https://placehold.co/500x350?text=SELLORA";
+img.alt=p.name;
+img.onerror=()=>img.src="https://placehold.co/500x350?text=SELLORA";
+const info=document.createElement("div");
+info.className="product-info";
+const title=document.createElement("h3");
+title.textContent=p.name;
+const desc=document.createElement("p");
+desc.textContent=p.description;
+const cat=document.createElement("p");
+cat.textContent=p.category;
+const price=document.createElement("div");
+price.className="price";
+price.textContent="€"+p.price.toFixed(2);
+const stock=document.createElement("p");
+stock.className="muted";
+stock.textContent="Available: "+p.stock;
+const btn=document.createElement("button");
+btn.className="gold";
+btn.textContent="Add to Cart";
+btn.disabled=p.stock<=0;
+btn.onclick=()=>addCart(p.id);
+info.append(title,desc,cat,price,stock,btn);
+card.append(img,info);
+area.append(card);
+});
+}
+
+function searchProducts(){
+const q=document.getElementById("search").value.toLowerCase();
+renderProducts(products.filter(p=>(p.name+" "+p.description+" "+p.category).toLowerCase().includes(q)));
+location.hash="products";
+}
+
+function filter(category){
+renderProducts(category==="All"?products:products.filter(p=>p.category===category));
+location.hash="products";
+}
+
+function addCart(id){
+const p=products.find(x=>x.id===id);
+if(!p||p.stock<=0)return alert("Product unavailable.");
+cart.push(id);
+renderCart();
+}
+
+function renderCart(){
+const area=document.getElementById("cartItems");
+area.innerHTML="";
+let sum=0;
+if(!cart.length)area.textContent="Your cart is empty.";
+cart.forEach((id,index)=>{
+const p=products.find(x=>x.id===id);
+if(!p)return;
+sum+=p.price;
+const row=document.createElement("div");
+row.className="cart-item";
+const name=document.createElement("span");
+name.textContent=p.name+" - €"+p.price.toFixed(2);
+const remove=document.createElement("button");
+remove.className="dark";
+remove.textContent="Remove";
+remove.onclick=()=>{cart.splice(index,1);renderCart()};
+row.append(name,remove);
+area.append(row);
+});
+document.getElementById("total").textContent=sum.toFixed(2);
+document.getElementById("cartCount").textContent=cart.length;
+}
+
+function showAuth(type){
+document.getElementById("auth").classList.remove("hidden");
+document.getElementById("account").style.display="none";
+const signup=type==="signup";
+document.getElementById("authTitle").textContent=signup?"Create SELLORA Account":"Login to SELLORA";
+document.getElementById("name").classList.toggle("hidden",!signup);
+document.getElementById("role").classList.toggle("hidden",!signup);
+document.getElementById("authSubmit").textContent=signup?"Create Account":"Login";
+document.getElementById("authForm").dataset.type=type;
+document.getElementById("authSwitch").innerHTML=signup?
+'Already registered? <a href="#" onclick="showAuth(\'login\')">Login</a>':
+'New to SELLORA? <a href="#" onclick="showAuth(\'signup\')">Create account</a>';
+location.hash="auth";
+}
+
+// DEMONSTRATION AUTHENTICATION ONLY.
+// Replace with secure server authentication before launch.
+document.getElementById("authForm").onsubmit=e=>{
+e.preventDefault();
+const users=JSON.parse(localStorage.getItem("selloraUsers")||"[]");
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+const type=e.target.dataset.type;
+
+if(type==="signup"){
+if(users.some(u=>u.email===email))return alert("Email already registered.");
+users.push({
+name:document.getElementById("name").value,
+email,password,
+role:document.getElementById("role").value
+});
+localStorage.setItem("selloraUsers",JSON.stringify(users));
+alert("Demo account created. Please login.");
+showAuth("login");
+return;
+}
+
+const user=users.find(u=>u.email===email&&u.password===password);
+if(!user)return alert("Incorrect login details.");
+currentUser=user;
+updateAccount();
+document.getElementById("auth").classList.add("hidden");
+location.hash="account";
+};
+
+function updateAccount(){
+document.getElementById("welcome").textContent="Welcome, "+currentUser.name;
+document.getElementById("profileEmail").textContent=currentUser.email;
+document.getElementById("profileRole").textContent="Account type: "+currentUser.role;
+document.getElementById("loginBtn").classList.add("hidden");
+document.getElementById("logoutBtn").classList.remove("hidden");
+document.getElementById("account").style.display="block";
+renderMyOrders();
+}
+
+function logout(){
+currentUser=null;
+document.getElementById("account").style.display="none";
+document.getElementById("loginBtn").classList.remove("hidden");
+document.getElementById("logoutBtn").classList.add("hidden");
+location.hash="home";
+}
+
+document.getElementById("sellForm").onsubmit=e=>{
+e.preventDefault();
+if(!currentUser)return showAuth("login");
+if(currentUser.role!=="seller")return alert("Create a seller account to publish products.");
+const p={
+id:Date.now(),
+name:document.getElementById("productName").value,
+price:Number(document.getElementById("productPrice").value),
+category:document.getElementById("productCategory").value,
+stock:Number(document.getElementById("productStock").value),
+description:document.getElementById("productDescription").value,
+image:document.getElementById("productImage").value
+};
+products.unshift(p);
+renderProducts();
+e.target.reset();
+alert("Demo product published!");
+location.hash="products";
+};
+
+function checkout(){
+if(!currentUser)return showAuth("login");
+if(!cart.length)return alert("Your cart is empty.");
+document.getElementById("checkout").classList.remove("hidden");
+document.getElementById("buyerName").value=currentUser.name;
+document.getElementById("buyerEmail").value=currentUser.email;
+location.hash="checkout";
+}
+
+document.getElementById("checkoutForm").onsubmit=e=>{
+e.preventDefault();
+const method=document.getElementById("payment").value;
+if(method==="card"||method==="bank"){
+alert("Payment provider is not connected. No payment has been taken.");
+return;
+}
+const order={
+id:"SO-"+Date.now(),
+buyer:currentUser.email,
+items:cart.map(id=>products.find(p=>p.id===id)?.name),
+total:cart.reduce((sum,id)=>sum+(products.find(p=>p.id===id)?.price||0),0),
+address:document.getElementById("address").value,
+method,
+status:"Pending confirmation"
+};
+orders.push(order);
+document.getElementById("checkoutMessage").textContent="Demo order recorded. Payment is due on delivery.";
+cart=[];
+renderCart();
+renderMyOrders();
+e.target.reset();
+};
+
+function renderMyOrders(){
+const area=document.getElementById("myOrders");
+area.innerHTML="";
+const mine=orders.filter(o=>o.buyer===currentUser.email);
+if(!mine.length)area.textContent="No orders yet.";
+mine.forEach(o=>{
+const p=document.createElement("p");
+p.textContent=o.id+" - €"+o.total.toFixed(2)+" - "+o.status;
+area.append(p);
+});
+}
+
+function showSellerOrders(){
+alert("Seller order management will be connected to the production database.");
+}
+
+renderProducts();
+renderCart();
+
+</script>
+</body>
+</html>
